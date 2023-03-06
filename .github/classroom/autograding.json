@@ -1,0 +1,84 @@
+{
+  "tests": [
+    {
+      "name": "CountryController Tests",
+      "setup": "mvn compile",
+      "run": "mvn test -P test -Dtest=CountryControllerTest",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 0
+    },
+    {
+      "name": "CountryService Tests",
+      "setup": "mvn compile",
+      "run": "mvn test -P test -Dtest=CountryServiceTest",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 0
+    },
+    {
+      "name": "CityController Tests",
+      "setup": "mvn compile",
+      "run": "mvn test -P test -Dtest=CityControllerTest",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 10
+    },
+    {
+      "name": "CityService Tests",
+      "setup": "mvn compile",
+      "run": "mvn test -P test -Dtest=CityServiceTest",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 11
+    },
+    {
+      "name": "VenueController Tests",
+      "setup": "mvn compile",
+      "run": "mvn test -P test -Dtest=VenueControllerTest",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 10
+    },
+    {
+      "name": "VenueService Tests",
+      "setup": "mvn compile",
+      "run": "mvn test -P test -Dtest=VenueServiceTest",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 11
+    },
+    {
+      "name": "EventController Tests",
+      "setup": "mvn compile",
+      "run": "mvn test -P test -Dtest=EventControllerTest",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 10
+    },
+    {
+      "name": "EventService Tests",
+      "setup": "mvn compile",
+      "run": "mvn test -P test -Dtest=EventServiceTest",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 11
+    }
+  ]
+}
