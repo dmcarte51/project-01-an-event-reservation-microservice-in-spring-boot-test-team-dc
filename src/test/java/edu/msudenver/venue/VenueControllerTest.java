@@ -1,4 +1,4 @@
-package edu.msudenver.country;
+package edu.msudenver.venue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,67 +23,67 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(value = CountryController.class)
-public class CountryControllerTest {
+@WebMvcTest(value = VenueController.class)
+public class VenueControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private CountryRepository countryRepository;
+    private VenueRepository venueRepository;
 
     @SpyBean
-    private CountryService countryService;
+    private VenueService venueService;
 
     @Test
-    public void testGetCountries() throws Exception {
+    public void testGetVenues() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/countries/")
+                .get("/venues/")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Country testCountry = new Country();
-        testCountry.setCountryCode("us");
-        testCountry.setCountryName("United States");
+        Venue testVenue = new Venue();
+        testVenue.setId(9999);
+        testVenue.setVenueName("Ball Arena");
 
-        Mockito.when(countryRepository.findAll()).thenReturn(Arrays.asList(testCountry));
+        Mockito.when(venueRepository.findAll()).thenReturn(Arrays.asList(testVenue));
 
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertTrue(response.getContentAsString().contains("United States"));
+        assertTrue(response.getContentAsString().contains("Ball Arena"));
     }
 
     @Test
-    public void testGetCountry() throws Exception {
+    public void testGetVenue() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/countries/us")
+                .get("/venues/304")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Country testCountry = new Country();
-        testCountry.setCountryCode("us");
-        testCountry.setCountryName("United States");
+        Venue testVenue = new Venue();
+        testVenue.setId(304);
+        testVenue.setVenueName("Ball Arena");
 
-        Mockito.when(countryRepository.findById(Mockito.anyString())).thenReturn(Optional.of(testCountry));
+        Mockito.when(venueRepository.findById(Mockito.anyInt())).thenReturn(Optional.of(testVenue));
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertTrue(response.getContentAsString().contains("United States"));
+        assertTrue(response.getContentAsString().contains("Ball Arena"));
     }
 
     @Test
-    public void testGetCountryNotFound() throws Exception {
+    public void testGetVenueNotFound() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/countries/notfound")
+                .get("/venues/0")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Mockito.when(countryRepository.findById(Mockito.anyString())).thenReturn(Optional.empty());
+        Mockito.when(venueRepository.findById(Mockito.anyInt())).thenReturn(Optional.empty());
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
@@ -93,35 +93,36 @@ public class CountryControllerTest {
     }
 
     @Test
-    public void testCreateCountry() throws Exception {
+    public void testCreateVenue() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/countries/")
+                .post("/venues/")
                 .accept(MediaType.APPLICATION_JSON)
-                .content("{\"countryCode\":\"ca\", \"countryName\": \"Canada\"}")
+                .content("{\"venueName\":\"Oracle Arena\", " + "\"venueType\": \"Stadium\", " + "\"streetAddress\": \"4312 test street\"}")
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Country canada = new Country();
-        canada.setCountryName("Canada");
-        canada.setCountryCode("ca");
-        Mockito.when(countryRepository.save(Mockito.any())).thenReturn(canada);
+        Venue oracle = new Venue();
+        oracle.setVenueName("Oracle Arena");
+        oracle.setVenueType("Stadium");
+        oracle.setStreetAddress("4312 test street");
+        Mockito.when(venueRepository.save(Mockito.any())).thenReturn(oracle);
 
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
 
         assertEquals(HttpStatus.CREATED.value(), response.getStatus());
-        assertTrue(response.getContentAsString().contains("Canada"));
+        assertTrue(response.getContentAsString().contains("Oracle Arena"));
     }
 
     @Test
-    public void testCreateCountryBadRequest() throws Exception {
+    public void testCreateVenueBadRequest() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/countries/")
+                .post("/venues/")
                 .accept(MediaType.APPLICATION_JSON)
-                .content("{\"countryName\": \"Canada\"}")
+                .content("{\"venueName\": \"Oracle\"}")
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Mockito.when(countryRepository.save(Mockito.any())).thenThrow(IllegalArgumentException.class);
+        Mockito.when(venueRepository.save(Mockito.any())).thenThrow(IllegalArgumentException.class);
 
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
@@ -132,40 +133,43 @@ public class CountryControllerTest {
     }
 
     @Test
-    public void testUpdateCountry() throws Exception {
+    public void testUpdateVenue() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .put("/countries/ca")
+                .put("/venues/1")
                 .accept(MediaType.APPLICATION_JSON)
-                .content("{\"countryCode\":\"ca\", \"countryName\": \"Canada Updated\"}")
+                .content("{\"VenueId\":\"1\", \"venueName\": \"Updated\", " +
+                        "\"streetAddress\": \"1234 updated street\", \"venueType\": \"Stadium\"}")
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Country canada = new Country();
-        canada.setCountryName("Canada");
-        canada.setCountryCode("ca");
-        Mockito.when(countryRepository.findById(Mockito.any())).thenReturn(Optional.of(canada));
+        Venue oracle = new Venue();
+        oracle.setVenueName("Oracle");
+        oracle.setId(1);
+        oracle.setStreetAddress("1234 updated st");
+        oracle.setVenueType("Stadium");
+        Mockito.when(venueRepository.findById(Mockito.any())).thenReturn(Optional.of(oracle));
 
-        Country canadaUpdated = new Country();
-        canadaUpdated.setCountryName("Canada Updated");
-        canadaUpdated.setCountryCode("ca");
-        Mockito.when(countryRepository.save(Mockito.any())).thenReturn(canadaUpdated);
+        Venue oracleUpdated = new Venue();
+        oracleUpdated.setVenueName("Oracle Updated");
+        oracleUpdated.setId(1);
+        Mockito.when(venueRepository.save(Mockito.any())).thenReturn(oracleUpdated);
 
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertTrue(response.getContentAsString().contains("Canada Updated"));
+        assertTrue(response.getContentAsString().contains("Oracle Updated"));
     }
 
     @Test
-    public void testUpdateCountryNotFound() throws Exception {
+    public void testUpdateVenueNotFound() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .put("/countries/notfound")
+                .put("/venues/0")
                 .accept(MediaType.APPLICATION_JSON)
-                .content("{\"countryCode\":\"notfound\"}")
+                .content("{\"venueId\":\"0\"}")
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Mockito.when(countryRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+        Mockito.when(venueRepository.findById(Mockito.any())).thenReturn(Optional.empty());
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
@@ -175,19 +179,19 @@ public class CountryControllerTest {
     }
 
     @Test
-    public void testUpdateCountryBadRequest() throws Exception {
+    public void testUpdateVenueBadRequest() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .put("/countries/ca")
+                .put("/venues/1")
                 .accept(MediaType.APPLICATION_JSON)
-                .content("{\"countryCode\":\"ca\"}")
+                .content("{\"venueId\":\"1\"}")
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Country canada = new Country();
-        canada.setCountryName("Canada");
-        canada.setCountryCode("ca");
-        Mockito.when(countryRepository.findById(Mockito.any())).thenReturn(Optional.of(canada));
+        Venue oracle = new Venue();
+        oracle.setVenueName("Oracle");
+        oracle.setId(1);
+        Mockito.when(venueRepository.findById(Mockito.any())).thenReturn(Optional.of(oracle));
 
-        Mockito.when(countryRepository.save(Mockito.any())).thenThrow(IllegalArgumentException.class);
+        Mockito.when(venueRepository.save(Mockito.any())).thenThrow(IllegalArgumentException.class);
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
@@ -197,17 +201,17 @@ public class CountryControllerTest {
     }
 
     @Test
-    public void testDeleteCountry() throws Exception {
+    public void testDeleteVenue() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .delete("/countries/ca")
+                .delete("/venues/1")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Country canada = new Country();
-        canada.setCountryName("Canada");
-        canada.setCountryCode("ca");
-        Mockito.when(countryRepository.findById(Mockito.any())).thenReturn(Optional.of(canada));
-        Mockito.when(countryRepository.existsById(Mockito.any())).thenReturn(true);
+        Venue oracle = new Venue();
+        oracle.setVenueName("oracle");
+        oracle.setId(1);
+        Mockito.when(venueRepository.findById(Mockito.any())).thenReturn(Optional.of(oracle));
+        Mockito.when(venueRepository.existsById(Mockito.any())).thenReturn(true);
 
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
@@ -216,16 +220,16 @@ public class CountryControllerTest {
     }
 
     @Test
-    public void testDeleteCountryNotFound() throws Exception {
+    public void testDeleteVenueNotFound() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .delete("/countries/notfound")
+                .delete("/venues/34573")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Mockito.when(countryRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-        Mockito.when(countryRepository.existsById(Mockito.any())).thenReturn(false);
+        Mockito.when(venueRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+        Mockito.when(venueRepository.existsById(Mockito.any())).thenReturn(false);
         Mockito.doThrow(IllegalArgumentException.class)
-                .when(countryRepository)
+                .when(venueRepository)
                 .deleteById(Mockito.any());
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
@@ -233,4 +237,6 @@ public class CountryControllerTest {
         assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
         assertTrue(response.getContentAsString().isEmpty());
     }
+
+
 }

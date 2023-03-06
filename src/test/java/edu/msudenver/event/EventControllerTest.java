@@ -1,7 +1,9 @@
-package edu.msudenver.country;
+package edu.msudenver.event;
 
+import edu.msudenver.event.Event;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -23,67 +25,67 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(value = CountryController.class)
-public class CountryControllerTest {
+@WebMvcTest(value = EventController.class)
+public class EventControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private CountryRepository countryRepository;
+    private EventRepository eventRepository;
 
     @SpyBean
-    private CountryService countryService;
+    private EventService eventService;
 
     @Test
-    public void testGetCountries() throws Exception {
+    public void testGetEvents() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/countries/")
+                .get("/events/")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Country testCountry = new Country();
-        testCountry.setCountryCode("us");
-        testCountry.setCountryName("United States");
+        Event testEvent = new Event();
+        testEvent.setEventId(9999);
+        testEvent.setEventTitle("Gaming Hours");
 
-        Mockito.when(countryRepository.findAll()).thenReturn(Arrays.asList(testCountry));
+        Mockito.when(eventRepository.findAll()).thenReturn(Arrays.asList(testEvent));
 
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertTrue(response.getContentAsString().contains("United States"));
+        assertTrue(response.getContentAsString().contains("Gaming Hours"));
     }
 
     @Test
-    public void testGetCountry() throws Exception {
+    public void testGetEvent() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/countries/us")
+                .get("/events/304")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Country testCountry = new Country();
-        testCountry.setCountryCode("us");
-        testCountry.setCountryName("United States");
+        Event testEvent = new Event();
+        testEvent.setEventId(304);
+        testEvent.setEventTitle("gaming hours");
 
-        Mockito.when(countryRepository.findById(Mockito.anyString())).thenReturn(Optional.of(testCountry));
+        Mockito.when(eventRepository.findById(Mockito.anyInt())).thenReturn(Optional.of(testEvent));
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertTrue(response.getContentAsString().contains("United States"));
+        assertTrue(response.getContentAsString().contains("gaming hours"));
     }
 
     @Test
-    public void testGetCountryNotFound() throws Exception {
+    public void testGetEventNotFound() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/countries/notfound")
+                .get("/events/0")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Mockito.when(countryRepository.findById(Mockito.anyString())).thenReturn(Optional.empty());
+        Mockito.when(eventRepository.findById(Mockito.anyInt())).thenReturn(Optional.empty());
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
@@ -93,35 +95,34 @@ public class CountryControllerTest {
     }
 
     @Test
-    public void testCreateCountry() throws Exception {
+    public void testCreateEvent() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/countries/")
+                .post("/events/")
                 .accept(MediaType.APPLICATION_JSON)
-                .content("{\"countryCode\":\"ca\", \"countryName\": \"Canada\"}")
+                .content("{\"eventTitle\":\"gaming hours\"}")
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Country canada = new Country();
-        canada.setCountryName("Canada");
-        canada.setCountryCode("ca");
-        Mockito.when(countryRepository.save(Mockito.any())).thenReturn(canada);
+        Event gaming = new Event();
+        gaming.setEventTitle("gaming hours");
+        Mockito.when(eventRepository.save(Mockito.any())).thenReturn(gaming);
 
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
 
         assertEquals(HttpStatus.CREATED.value(), response.getStatus());
-        assertTrue(response.getContentAsString().contains("Canada"));
+        assertTrue(response.getContentAsString().contains("gaming hours"));
     }
 
     @Test
-    public void testCreateCountryBadRequest() throws Exception {
+    public void testCreateEventBadRequest() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/countries/")
+                .post("/events/")
                 .accept(MediaType.APPLICATION_JSON)
-                .content("{\"countryName\": \"Canada\"}")
+                .content("{\"eventTitle\": \"Gaming hours\"}")
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Mockito.when(countryRepository.save(Mockito.any())).thenThrow(IllegalArgumentException.class);
+        Mockito.when(eventRepository.save(Mockito.any())).thenThrow(IllegalArgumentException.class);
 
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
@@ -132,40 +133,41 @@ public class CountryControllerTest {
     }
 
     @Test
-    public void testUpdateCountry() throws Exception {
+    public void testUpdateEvent() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .put("/countries/ca")
+                .put("/events/1")
                 .accept(MediaType.APPLICATION_JSON)
-                .content("{\"countryCode\":\"ca\", \"countryName\": \"Canada Updated\"}")
+                .content("{\"eventId\":\"1\", \"eventTitle\": \"gaming Updated\", " +
+                        "\"eventStart\": \"2022-03-04T12:00:00.000\", \"eventEnd\": \"2022-03-04T16:00:00.000\"}")
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Country canada = new Country();
-        canada.setCountryName("Canada");
-        canada.setCountryCode("ca");
-        Mockito.when(countryRepository.findById(Mockito.any())).thenReturn(Optional.of(canada));
+        Event gaming = new Event();
+        gaming.setEventTitle("Gaming hours");
+        gaming.setEventId(1);
+        Mockito.when(eventRepository.findById(Mockito.any())).thenReturn(Optional.of(gaming));
 
-        Country canadaUpdated = new Country();
-        canadaUpdated.setCountryName("Canada Updated");
-        canadaUpdated.setCountryCode("ca");
-        Mockito.when(countryRepository.save(Mockito.any())).thenReturn(canadaUpdated);
+        Event gamingUpdated = new Event();
+        gamingUpdated.setEventTitle("gaming hours Updated");
+        gamingUpdated.setEventId(1);
+        Mockito.when(eventRepository.save(Mockito.any())).thenReturn(gamingUpdated);
 
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertTrue(response.getContentAsString().contains("Canada Updated"));
+        assertTrue(response.getContentAsString().contains("gaming hours Updated"));
     }
 
     @Test
-    public void testUpdateCountryNotFound() throws Exception {
+    public void testUpdateEventNotFound() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .put("/countries/notfound")
+                .put("/events/0")
                 .accept(MediaType.APPLICATION_JSON)
-                .content("{\"countryCode\":\"notfound\"}")
+                .content("{\"eventId\":\"0\"}")
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Mockito.when(countryRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+        Mockito.when(eventRepository.findById(Mockito.any())).thenReturn(Optional.empty());
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
@@ -175,19 +177,19 @@ public class CountryControllerTest {
     }
 
     @Test
-    public void testUpdateCountryBadRequest() throws Exception {
+    public void testUpdateEventBadRequest() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .put("/countries/ca")
+                .put("/events/1")
                 .accept(MediaType.APPLICATION_JSON)
-                .content("{\"countryCode\":\"ca\"}")
+                .content("{\"eventId\":\"1\"}")
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Country canada = new Country();
-        canada.setCountryName("Canada");
-        canada.setCountryCode("ca");
-        Mockito.when(countryRepository.findById(Mockito.any())).thenReturn(Optional.of(canada));
+        Event gaming = new Event();
+        gaming.setEventTitle("gaming hours");
+        gaming.setEventId(1);
+        Mockito.when(eventRepository.findById(Mockito.any())).thenReturn(Optional.of(gaming));
 
-        Mockito.when(countryRepository.save(Mockito.any())).thenThrow(IllegalArgumentException.class);
+        Mockito.when(eventRepository.save(Mockito.any())).thenThrow(IllegalArgumentException.class);
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         MockHttpServletResponse response = result.getResponse();
@@ -197,17 +199,17 @@ public class CountryControllerTest {
     }
 
     @Test
-    public void testDeleteCountry() throws Exception {
+    public void testDeleteEvent() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .delete("/countries/ca")
+                .delete("/events/1")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Country canada = new Country();
-        canada.setCountryName("Canada");
-        canada.setCountryCode("ca");
-        Mockito.when(countryRepository.findById(Mockito.any())).thenReturn(Optional.of(canada));
-        Mockito.when(countryRepository.existsById(Mockito.any())).thenReturn(true);
+        Event gaming = new Event();
+        gaming.setEventTitle("oracle");
+        gaming.setEventId(1);
+        Mockito.when(eventRepository.findById(Mockito.any())).thenReturn(Optional.of(gaming));
+        Mockito.when(eventRepository.existsById(Mockito.any())).thenReturn(true);
 
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
@@ -216,16 +218,16 @@ public class CountryControllerTest {
     }
 
     @Test
-    public void testDeleteCountryNotFound() throws Exception {
+    public void testDeleteEventNotFound() throws Exception {
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .delete("/countries/notfound")
+                .delete("/events/34573")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON);
 
-        Mockito.when(countryRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-        Mockito.when(countryRepository.existsById(Mockito.any())).thenReturn(false);
+        Mockito.when(eventRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+        Mockito.when(eventRepository.existsById(Mockito.any())).thenReturn(false);
         Mockito.doThrow(IllegalArgumentException.class)
-                .when(countryRepository)
+                .when(eventRepository)
                 .deleteById(Mockito.any());
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
@@ -233,4 +235,6 @@ public class CountryControllerTest {
         assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
         assertTrue(response.getContentAsString().isEmpty());
     }
+
+
 }
